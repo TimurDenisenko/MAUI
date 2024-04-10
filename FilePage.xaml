@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MAUI.FilePage"
+             Title="FilePage">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Entry x:Name="EntryFile" Placeholder="Sisesta faili nimi" WidthRequest="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=Width}"></Entry>
+            <Button Grid.Row="1" x:Name="ButtonFile" Text="Salvesta" Clicked="ButtonFile_Clicked" WidthRequest="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=Width}"></Button>
+            <Editor Grid.Row="2" x:Name="EditorText" FontSize="Large"></Editor>
+            <VerticalStackLayout Grid.Row="3">
+                <Label Text="Failide loetelu: " FontSize="Title"></Label>
+                <ScrollView>
+                <ListView x:Name="ListFile" ItemSelected="ListFile_ItemSelected">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextCell Text="{Binding}">
+                                <TextCell.ContextActions>
+                                    <MenuItem x:Name="Delete" Text="Kustuta fail" IsDestructive="True" Clicked="Delete_Clicked"></MenuItem>
+                                        <MenuItem x:Name="ToList" Text="Tekst loetelu" IsDestructive="True" Clicked="ToList_Clicked"></MenuItem>
+                                    </TextCell.ContextActions>
+                            </TextCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                </ScrollView>
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Row="4">
+                <Label Text="Faili sisu loendis: " FontSize="Title"></Label>
+                <ListView x:Name="ListFailist">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextCell Text="{Binding}"></TextCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </VerticalStackLayout>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>
