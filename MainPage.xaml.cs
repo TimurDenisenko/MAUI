@@ -5,7 +5,7 @@ public partial class MainPage : ContentPage
     VerticalStackLayout st;
     Button btn;
     List<ContentPage> pages =
-        new List<ContentPage>() { new Teine(), new FilePage()
+        new List<ContentPage>() { new TestPage(), new FilePage()
         };
 
     public MainPage()

@@ -15,10 +15,10 @@
             <Entry x:Name="EntryFile" Placeholder="Sisesta faili nimi" WidthRequest="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=Width}"></Entry>
             <Button Grid.Row="1" x:Name="ButtonFile" Text="Salvesta" Clicked="ButtonFile_Clicked" WidthRequest="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=Width}"></Button>
             <Editor Grid.Row="2" x:Name="EditorText" FontSize="Large"></Editor>
-            <VerticalStackLayout Grid.Row="3">
-                <Label Text="Failide loetelu: " FontSize="Title"></Label>
-                <ScrollView>
-                <ListView x:Name="ListFile" ItemSelected="ListFile_ItemSelected">
+            <ScrollView Grid.Row="3">
+            <VerticalStackLayout>
+                    <Label Text="Failide loetelu: " FontSize="Title"></Label>
+                    <ListView x:Name="ListFile" ItemSelected="ListFile_ItemSelected">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextCell Text="{Binding}">
@@ -30,8 +30,8 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                </ScrollView>
-            </VerticalStackLayout>
+                </VerticalStackLayout>
+            </ScrollView>
             <VerticalStackLayout Grid.Row="4">
                 <Label Text="Faili sisu loendis: " FontSize="Title"></Label>
                 <ListView x:Name="ListFailist">

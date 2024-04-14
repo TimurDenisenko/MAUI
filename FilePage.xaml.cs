@@ -1,4 +1,4 @@
-namespace MAUI;
+﻿namespace MAUI;
 
 public partial class FilePage : ContentPage
 {
@@ -18,7 +18,7 @@ public partial class FilePage : ContentPage
         if (string.IsNullOrEmpty(fileName)) return;
         if (File.Exists(Path.Combine(folderPath,fileName)))
         {
-            bool isSave = await DisplayAlert("Kinnitus","Fail un juba olemas. Kas tahas �mber kirjutada?","Jah","Ei");
+            bool isSave = await DisplayAlert("Kinnitus","Fail un juba olemas. Kas tahas ьmber kirjutada?","Jah","Ei");
             if (!isSave) return;
         }
         await File.WriteAllTextAsync(Path.Combine(folderPath, fileName), EditorText.Text);
@@ -37,11 +37,15 @@ public partial class FilePage : ContentPage
 
     private void Delete_Clicked(object sender, EventArgs e)
     {
-
+        string fileName = (string)((MenuItem)sender).BindingContext;
+        File.Delete(Path.Combine(folderPath, fileName));
+        UpdateFiles();
     }
 
     private void ToList_Clicked(object sender, EventArgs e)
     {
-
+        string fileName = (string)((MenuItem)sender).BindingContext;
+        List<string> list = File.ReadLines(Path.Combine(folderPath, fileName)).ToList();
+        ListFailist.ItemsSource = list;
     }
 }
