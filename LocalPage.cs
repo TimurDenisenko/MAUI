@@ -2,17 +2,17 @@
 {
     public class LocalPage
     {
-        public string Header { get; set; }
-        public string Description { get; set; }
-        private static int created { get; set; }
+        public string Word { get; set; }
+        public string Translated { get; set; }
+        public static int Created { get; set; }
         public int Num { get; set; }
         
         public LocalPage() { }
-        public LocalPage(string header, string desc) 
+        public LocalPage(string Word, string TranslatedWord) 
         { 
-            Header = header;
-            Description = desc;
-            Num = ++created;
+            this.Word = Word;
+            this.Translated = TranslatedWord;
+            Num = ++Created;
         }
     }
 }

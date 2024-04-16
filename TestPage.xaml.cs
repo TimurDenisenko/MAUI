@@ -12,12 +12,11 @@ public partial class TestPage : ContentPage
         Title = "TestPage";
         cv = new CarouselView();
         pages = new ObservableCollection<LocalPage>();
-        CreatePage("Noorem tarkvaraarendaja", "https://www.tthk.ee/opetatavad_erialad/noorem-tarkvaraarendaja/");
-        CreatePage("Logistika IT-süsteemide nooremspetsialist", "https://www.tthk.ee/opetatavad_erialad/logistika-it-susteemide-nooremspetsialist/");
-        CreatePage("Mehhatroonik", "https://www.tthk.ee/opetatavad_erialad/mehhatroonik/");
-        CreatePage("Tööstusinformaatik", "https://www.tthk.ee/opetatavad_erialad/toostusinformaatik/");
-        CreatePage("Juuksur", "https://www.tthk.ee/opetatavad_erialad/juuksur/");
-        CreatePage("Robotitehnik", "https://www.tthk.ee/opetatavad_erialad/robotitehnik/");
+        CreatePage(new List<LocalPage>
+        {
+            new LocalPage("Tarkvara","Программное обеспечение"),
+            new LocalPage("Sõnastik","Словарь"),
+        });
         GeneratePages();
     }
     private void GeneratePages()
@@ -25,21 +24,8 @@ public partial class TestPage : ContentPage
         cv.ItemsSource = pages;
         cv.ItemTemplate = new DataTemplate(() =>
         {
-            Label header = new Label
-            {
-                FontSize = 32,
-                HorizontalOptions = LayoutOptions.Center,
-            };
-            header.SetBinding(Label.TextProperty, "Header");
-
-            Label desc = new Label
-            {
-                FontSize = 25,
-                HorizontalOptions = LayoutOptions.Center,
-            };
-            desc.SetBinding(Label.TextProperty, "Description");
-            Button btn = new Button { WidthRequest = 300 };
-            btn.Clicked += async (s, e) => await Browser.OpenAsync(desc.Text);
+            Button btn = new Button { WidthRequest = 300, HeightRequest = 400 };
+            btn.SetBinding(Button.TextProperty, "Word");
             Label num = new Label
             {
                 FontSize = 15,
@@ -59,40 +45,79 @@ public partial class TestPage : ContentPage
                 {
                     new RowDefinition { Height = 50 },
                     new RowDefinition { Height = GridLength.Star },
-                    new RowDefinition { Height = 100 },
                     new RowDefinition { Height = GridLength.Star },
                     new RowDefinition { Height = GridLength.Star },
                     new RowDefinition { Height = GridLength.Star },
                     new RowDefinition { Height = GridLength.Star },
                     new RowDefinition { Height = GridLength.Star },
                 },
-                Children = { header, btn, desc, num, hsl }
+                Children = { btn,  num, hsl }
+            };
+            btn.Clicked += async (s, e) => 
+            {
+                while (btn.RotationY!=90)
+                {
+                    ++btn.RotationY;
+                    btn.Opacity -= 0.011;
+                    await Task.Delay(1);
+                }
+                btn.RotationY = 270;
+                btn.SetBinding(Button.TextProperty, "Translated");
+                while (btn.RotationY != 360)
+                {
+                    ++btn.RotationY;
+                    btn.Opacity += 0.011;
+                    await Task.Delay(1);
+                }
             };
             delete.Clicked += (s, e) =>
             {
                 int i = 0;
-                pages = new ObservableCollection<LocalPage>(pages.Where(x => x.Header != header.Text).Select(x => { x.Num = ++i; return x; }).Cast<LocalPage>());
+                --LocalPage.Created;
+                pages = new ObservableCollection<LocalPage>(pages.Where(x => x.Word != btn.Text).Select(x => { x.Num = ++i; return x; }).Cast<LocalPage>());
                 GeneratePages();
             };
             grid.SetRow(hsl, 0);
-            grid.SetRow(header, 1);
             grid.SetRow(btn, 3);
-            grid.SetRow(desc, 5);
-            grid.SetRow(num, 7);
+            grid.SetRow(num, 6);
             return grid;
         });
         Content = cv;
     }
-    private void CreatePage(string header, string desc)
+    private void CreatePage(List<LocalPage> pages)
     {
-        pages.Add(new LocalPage(header, desc));
+        foreach (LocalPage item in pages)
+        {
+            CreatePage(item);
+        }
     }
+    private void CreatePage(string word, string translate) => pages.Add(new LocalPage(word, translate));
+    private void CreatePage(LocalPage localPage) => pages.Add(localPage); 
     private async void CreateLocalPage()
     {
-        string header = await DisplayPromptAsync("Päis", "Kirjuta päis", cancel: "Tühista");
-        if (header == "Tühista" || header == string.Empty) { return; }
-        string desc = await DisplayPromptAsync("Kirjeldus", "Kirjuta kirjeldus", cancel: "Tühista");
-        if (desc == "Tühista" || desc == string.Empty) { return; }
-        CreatePage(header, desc);
+        string word, translate;
+        while (true)
+        {
+            word = await DisplayPromptAsync("Sõna", "Kirjuta sõna", cancel: "Tühista");
+            if (pages.Select(x => x.Word.ToLower()).Contains(word.ToLower()))
+            {
+                await DisplayAlert("Viga", "See sõna on olemas", "Tühista");
+                continue;
+            }
+            break;
+        }
+        if (word == null) { return; }
+        while (true)
+        {
+            translate = await DisplayPromptAsync("Tõlge", "Kirjuta sõna tõlge", cancel: "Tühista");
+            if (pages.Select(x => x.Translated).Contains(translate))
+            {
+                await DisplayAlert("Viga", "See sõna on olemas", "Tühista");
+                continue;
+            }
+            break;
+        }
+        if (translate == null) { return; }
+        CreatePage(word, translate);
     }
 }
