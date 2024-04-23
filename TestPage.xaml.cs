@@ -7,12 +7,12 @@ public partial class TestPage : ContentPage
 {
     CarouselView cv;
     ObservableCollection<LocalPage> pages;
-    int i = 0;
     char[] alp = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
     public TestPage()
-	{
+    {
         Title = "TestPage";
-        cv = new CarouselView { BackgroundColor = Color.FromRgb(50, 44, 43) };
+        Shell.SetBackgroundColor(this, Color.FromRgb(50, 44, 43));
+        cv = new CarouselView { BackgroundColor = Color.FromRgb(50, 44, 43), Loop = false };
         pages = DeserializeFromFile<ObservableCollection<LocalPage>>();
         if (pages==null)
         {
@@ -34,64 +34,85 @@ public partial class TestPage : ContentPage
         cv.ItemsSource = pages;
         cv.ItemTemplate = new DataTemplate(() =>
         {
-            Button btn = new Button { WidthRequest = 300, HeightRequest = 400, FontSize = 25, BackgroundColor = Color.FromRgb(128, 61, 59), TextColor = Color.FromRgb(228, 197, 158), CornerRadius = 15, BorderWidth = 1, BorderColor = Color.FromRgb(175, 130, 96),  };
+            Button btn = new() { WidthRequest = 300, HeightRequest = 400, FontSize = 25, BackgroundColor = Color.FromRgb(128, 61, 59), TextColor = Color.FromRgb(228, 197, 158), CornerRadius = 15, BorderWidth = 1, BorderColor = Color.FromRgb(175, 130, 96),  };
             btn.SetBinding(Button.TextProperty, "Word");
-            Label num = new Label { FontSize = 15, HorizontalOptions = LayoutOptions.Center, TextColor = Color.FromRgb(228, 197, 158) };
+            Label num = new() { FontSize = 15, HorizontalOptions = LayoutOptions.Center, TextColor = Color.FromRgb(228, 197, 158) };
             num.SetBinding(Label.TextProperty, "Num");
-            Button create = new Button { Text = "Loo uus küsimus",BackgroundColor = Color.FromRgb(128, 61, 59), BorderWidth = 1, BorderColor = Color.FromRgb(175, 130, 96), TextColor = Color.FromRgb(228, 197, 158) };
-            create.Clicked += (s, e) => { CreateLocalPage();  } ;
-            Button delete = new Button { Text = "Kustuta küsimus", BackgroundColor = Color.FromRgb(128, 61, 59), BorderWidth = 1, BorderColor = Color.FromRgb(175, 130, 96), TextColor = Color.FromRgb(228, 197, 158) };
-            Button edit = new Button { Text = "Muuda küsimus", BackgroundColor = Color.FromRgb(128, 61, 59), BorderWidth = 1, BorderColor = Color.FromRgb(175, 130, 96), TextColor = Color.FromRgb(228, 197, 158) };
-            Button doButton = new Button { };
-            doButton.SetBinding(Label.TextProperty, "Do");
+            Button create = new() { Text = "Loo uus" };
+            create.Clicked += (s, e) => { CreateLocalPage(); };
+            Button delete = new() {Text = "Kustuta" };
+            Button edit = new() { Text = "Muuda"  };
+            Button doButton = new();
+            doButton.SetBinding(Button.TextProperty,"Do");
             doButton.Text = doButton.Text == "true" ? "Õpitud" : "Õppimata";
-            Button sort = new Button { Text = "Sorteerimine" };
+            doButton.Clicked += async (s, e) =>
+            {
+                doButton.TextColor = Colors.White;
+                if (doButton.Text == "Õpitud")
+                {
+                    doButton.BackgroundColor = Colors.Red;
+                    doButton.Text = "Õppimata";
+                }
+                else
+                {
+                    doButton.BackgroundColor = Colors.Green;
+                    doButton.Text = "Õpitud";
+                }
+                await Task.Delay(500);
+                doButton.BackgroundColor = Color.FromRgb(128, 61, 59);
+                doButton.TextColor = Color.FromRgb(228, 197, 158);
+                pages = new ObservableCollection<LocalPage>(pages.Select(x => { x.Do = x.Word == btn.Text ? doButton.Text : x.Do; return x; }));
+                SerializeToFile(pages);
+            };
+            Button sort = new() { Text = "Sorteerimine" };
+            foreach (Button item in new Button[] {create,delete,edit,doButton,sort})
+            {
+                item.WidthRequest = 100;
+                item.BackgroundColor = Color.FromRgb(128, 61, 59);
+                item.BorderWidth = 1;
+                item.BorderColor = Color.FromRgb(175, 130, 96);
+                item.TextColor = Color.FromRgb(228, 197, 158);
+            }
             HorizontalStackLayout hsl = new HorizontalStackLayout
             {
-                Children = { create,new Button { WidthRequest = 19, BackgroundColor = Colors.Transparent }, delete, new Button { WidthRequest = 19, BackgroundColor = Colors.Transparent },edit },
+                Children = { create,new Button { WidthRequest = 19, BackgroundColor = Colors.Transparent, IsEnabled = false }, delete, new Button { WidthRequest = 19, BackgroundColor = Colors.Transparent, IsEnabled = false },edit },
                 HorizontalOptions = LayoutOptions.Center,
             };
             HorizontalStackLayout hsl1 = new HorizontalStackLayout
             {
-                Children = { doButton, new Button { WidthRequest = 19, BackgroundColor = Colors.Transparent }, sort },
+                Children = { doButton, new Button { WidthRequest = 19, BackgroundColor = Colors.Transparent, IsEnabled = false }, sort },
                 HorizontalOptions = LayoutOptions.Center,
-            };
-            VerticalStackLayout vsl = new VerticalStackLayout
-            {
-                HorizontalOptions = LayoutOptions.Center,
-                Children = {hsl, hsl1}
             };
             Grid grid = new Grid
             {
                 RowDefinitions =
                 {
                     new RowDefinition { Height = 50 },
+                    new RowDefinition { Height = 10 },
+                    new RowDefinition { Height = 50 },
+                    new RowDefinition { Height = 200 },
                     new RowDefinition { Height = GridLength.Star },
-                    new RowDefinition { Height = GridLength.Star },
-                    new RowDefinition { Height = GridLength.Star },
-                    new RowDefinition { Height = GridLength.Star },
-                    new RowDefinition { Height = GridLength.Star },
-                    new RowDefinition { Height = GridLength.Star },
+                    new RowDefinition { Height = 300 },
                     new RowDefinition { Height = GridLength.Star },
                 },
-                Children = { btn,  num, vsl}
+                Children = { btn,  num, hsl,hsl1 }
             };
             btn.Clicked += async (s, e) =>
             {
                 if (btn.RotationY != 0) return;
                 string text = btn.RotationX==1 ? "Word" : "Translated";
-                while (btn.RotationY!=90)
+                while (btn.RotationY<=90)
                 {
-                    btn.RotationY += 3;
-                    btn.Opacity -= 0.033;
+                    btn.RotationY += 4;
+                    btn.Opacity -= 4 / 90;
                     await Task.Delay(1);
                 }
                 btn.RotationY = 270;
                 btn.SetBinding(Button.TextProperty, text);
-                while (btn.RotationY != 360)
+                while (btn.RotationY <= 360)
                 {
-                    btn.RotationY+=3;
-                    btn.Opacity += 0.033;
+                    btn.RotationY+=4;
+                    btn.Opacity += 4 / 90;
                     await Task.Delay(1);
                 }
                 btn.Opacity = 1;
@@ -152,9 +173,10 @@ public partial class TestPage : ContentPage
                 btn.Text = uus;
                 SerializeToFile(pages);
             };
-            grid.SetRow(vsl, 0);
-            grid.SetRow(btn, 3);
-            grid.SetRow(num, 7);
+            grid.SetRow(hsl, 0);
+            grid.SetRow(hsl1, 2);
+            grid.SetRow(btn, 4);
+            grid.SetRow(num, 6);
             return grid;
         });
         Content = cv;

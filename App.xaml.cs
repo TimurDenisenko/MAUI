@@ -6,7 +6,7 @@ public partial class App : Application
 	{
 		MainPage = new Shell
 		{
-			CurrentItem = new MainPage()
+			CurrentItem = new MainPage(),
 		};
-	}
+    }
 }
