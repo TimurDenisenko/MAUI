@@ -7,6 +7,7 @@
         public static int Created { get; set; }
         public int Num { get; set; }
         public string Do { get; set; }
+        public static string Sort { get; set; }
         
         public LocalPage() { }
         public LocalPage(string Word, string TranslatedWord) 

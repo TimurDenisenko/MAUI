@@ -7,7 +7,7 @@ public partial class TestPage : ContentPage
 {
     CarouselView cv;
     ObservableCollection<LocalPage> pages;
-    char[] alp = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+    char[] alp = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','Ö','Ä','Ü','Õ','Ž','Š'};
     public TestPage()
     {
         Title = "TestPage";
@@ -34,17 +34,17 @@ public partial class TestPage : ContentPage
         cv.ItemsSource = pages;
         cv.ItemTemplate = new DataTemplate(() =>
         {
-            Button btn = new() { WidthRequest = 300, HeightRequest = 400, FontSize = 25, BackgroundColor = Color.FromRgb(128, 61, 59), TextColor = Color.FromRgb(228, 197, 158), CornerRadius = 15, BorderWidth = 1, BorderColor = Color.FromRgb(175, 130, 96),  };
+            Button btn = new() { WidthRequest = 300, HeightRequest = 400, FontSize = 15, BackgroundColor = Color.FromRgb(128, 61, 59), TextColor = Color.FromRgb(228, 197, 158), CornerRadius = 15, BorderWidth = 1, BorderColor = Color.FromRgb(175, 130, 96),  };
             btn.SetBinding(Button.TextProperty, "Word");
             Label num = new() { FontSize = 15, HorizontalOptions = LayoutOptions.Center, TextColor = Color.FromRgb(228, 197, 158) };
             num.SetBinding(Label.TextProperty, "Num");
             Button create = new() { Text = "Loo uus" };
-            create.Clicked += (s, e) => { CreateLocalPage(); };
+            create.Clicked += (s, e) => { CreateLocalPage(); GeneratePages();};
             Button delete = new() {Text = "Kustuta" };
             Button edit = new() { Text = "Muuda"  };
             Button doButton = new();
             doButton.SetBinding(Button.TextProperty,"Do");
-            doButton.Text = doButton.Text == "true" ? "Õpitud" : "Õppimata";
+            doButton.Loaded += (s, e) => doButton.Text = doButton.Text == "Õpitud" ? "Õpitud" : "Õppimata";
             doButton.Clicked += async (s, e) =>
             {
                 doButton.TextColor = Colors.White;
@@ -64,7 +64,65 @@ public partial class TestPage : ContentPage
                 pages = new ObservableCollection<LocalPage>(pages.Select(x => { x.Do = x.Word == btn.Text ? doButton.Text : x.Do; return x; }));
                 SerializeToFile(pages);
             };
-            Button sort = new() { Text = "Sorteerimine" };
+            Button sort = new() { Text = "Sorteeri" };
+            sort.Clicked +=async(s, e) =>
+            {
+                string sort = await DisplayActionSheet("Sorteerimine","Tühista",null, "А-Я", "A-Z", "0-9", "Õpitud");
+                if (sort == null) return;
+                else if (sort == "A-Z")
+                {
+                    if (LocalPage.Sort == "A-Z")
+                    {
+                        pages = new ObservableCollection<LocalPage>(pages.Reverse().Cast<LocalPage>());
+                        LocalPage.Sort = "Z-A";
+                    }
+                    else
+                    {
+                        pages = new ObservableCollection<LocalPage>(pages.OrderBy(x => x.Word[0]).Cast<LocalPage>());
+                        LocalPage.Sort = "A-Z";
+                    }
+                }
+                else if (sort == "А-Я")
+                {
+                    if (LocalPage.Sort == "А-Я")
+                    {
+                        pages = new ObservableCollection<LocalPage>(pages.Reverse().Cast<LocalPage>());
+                        LocalPage.Sort = "Я-А";
+                    }
+                    else
+                    {
+                        pages = new ObservableCollection<LocalPage>(pages.OrderBy(x => x.Translated[0]).Cast<LocalPage>());
+                        LocalPage.Sort = "А-Я";
+                    }
+                }
+                else if (sort == "0-9")
+                {
+                    if (LocalPage.Sort == "0-9")
+                    {
+                        pages = new ObservableCollection<LocalPage>(pages.Reverse().Cast<LocalPage>());
+                        LocalPage.Sort = "9-0";
+                    }
+                    else
+                    {
+                        pages = new ObservableCollection<LocalPage>(pages.OrderBy(x => x.Num).Cast<LocalPage>());
+                        LocalPage.Sort = "0-9";
+                    }
+                }
+                else if (sort == "Õpitud")
+                {
+                    if (LocalPage.Sort == "Õpitud")
+                    {
+                        pages = new ObservableCollection<LocalPage>(pages.Reverse().Cast<LocalPage>());
+                        LocalPage.Sort = "Õppimata";
+                    }
+                    else
+                    {
+                        pages = new ObservableCollection<LocalPage>(pages.OrderBy(x => x.Do).Cast<LocalPage>());
+                        LocalPage.Sort = "Õpitud";
+                    }
+                }
+                GeneratePages();
+            };
             foreach (Button item in new Button[] {create,delete,edit,doButton,sort})
             {
                 item.WidthRequest = 100;
@@ -122,11 +180,14 @@ public partial class TestPage : ContentPage
             };
             delete.Clicked += (s, e) =>
             {
-                int i = 0;
-                --LocalPage.Created;
-                pages = new ObservableCollection<LocalPage>(pages.Where(x => x.Word != btn.Text).Select(x => { x.Num = ++i; return x; }).Cast<LocalPage>());
-                SerializeToFile(pages);
-                GeneratePages();
+                if (pages.Count !=1)
+                {
+                    int i = 0;
+                    --LocalPage.Created;
+                    pages = new ObservableCollection<LocalPage>(pages.Where(x => x.Word != btn.Text).Select(x => { x.Num = ++i; return x; }).Cast<LocalPage>());
+                    SerializeToFile(pages);
+                    GeneratePages();
+                }
             };
             edit.Clicked+=async (s, e) =>
             {
